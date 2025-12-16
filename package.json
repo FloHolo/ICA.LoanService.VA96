@@ -2,5 +2,9 @@
   "devDependencies": {
     "rimraf": "^6.1.0",
     "ts-node": "^10.9.2"
+  },
+  "dependencies": {
+    "@azure/cosmos": "^4.9.0",
+    "@azure/functions": "^4.0.0"
   }
 }

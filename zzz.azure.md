@@ -28,3 +28,9 @@ export COSMOS_KEY=$(\
  --query primaryMasterKey \
  -o tsv \
 )
+
+
+npm install @azure/cosmos
+
+
+cd /workspaces/ICA.LoanService.VA96 && npx tsc --noEmit
