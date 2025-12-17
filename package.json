@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "prettier": "^3.7.4",
     "rimraf": "^6.1.0",
     "ts-node": "^10.9.2"
   },
