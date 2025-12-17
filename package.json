@@ -1,11 +1,28 @@
 {
-  "devDependencies": {
-    "prettier": "^3.7.4",
-    "rimraf": "^6.1.0",
-    "ts-node": "^10.9.2"
+  "name": "catalogueservices-va96",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/functions/*.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "clean": "rimraf dist",
+    "prestart": "npm run clean && npm run build",
+    "start": "func start",
+    "test": "echo \"No tests yet...\"",
+    "seed": "ts-node src/seed/seed.ts",
+    "seed:test": "ts-node src/seed/testseed.ts"
   },
   "dependencies": {
-    "@azure/cosmos": "^4.9.0",
-    "@azure/functions": "^4.0.0"
+    "@azure/cosmos": "^4.7.0",
+    "@azure/functions": "^4.0.0",
+    "@azure/identity": "^4.13.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.x",
+    "azure-functions-core-tools": "^4.x",
+    "rimraf": "^5.0.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^4.0.0"
   }
 }
