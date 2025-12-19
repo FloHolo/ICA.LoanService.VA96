@@ -1,4 +1,4 @@
-name: Build
+name: Build and Deploy to Test
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  build-and-publish:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,3 +29,46 @@ jobs:
 
       - name: Build (into ./dist)
         run: npm run build
+
+      - name: Publish function app to package folder
+        run: |
+          # make an empty package folder
+          rm -rf package
+          mkdir package
+
+          # copy root metadata
+          cp host.json package/
+          cp package.json package/
+          cp package-lock.json package/
+
+          # copy compiled JS
+          cp -r dist package/dist
+
+          # install runtime dependencies only (no devDeps) into the package
+          npm ci --omit=dev --prefix package
+
+      - name: Save package temporarily for deployment
+        uses: actions/upload-artifact@v4
+        with:
+          name: functionapp-package
+          path: package
+          retention-days: 1
+
+  deploy-to-test:
+    needs: build-and-publish
+    runs-on: ubuntu-latest
+    environment: test
+
+    steps:
+      - name: Download package artefact
+        uses: actions/download-artifact@v4
+        with:
+          name: functionapp-package
+          path: package
+
+      - name: Deploy to Azure Function App
+        uses: azure/functions-action@v1
+        with:
+          app-name: 'loan-test-va96-func' # replace with your Function App name
+          package: package
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}

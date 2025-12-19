@@ -10,8 +10,9 @@ export function getEnvConfig(): EnvConfig {
   return {
     cosmosKey: process.env.COSMOS_KEY,
     cosmosEndpoint: process.env.COSMOS_ENDPOINT,
-    databaseName: process.env.DATABASE_NAME || 'defaultdb',
-    containerName: process.env.CONTAINER_NAME || 'catalogue',
-    loanContainerName: process.env.LOAN_CONTAINER_NAME || 'loans',
+    databaseName: process.env.DATABASE_NAME || 'loan-db',
+    containerName: process.env.CONTAINER_NAME || 'loan',
+    loanContainerName: process.env.LOAN_CONTAINER_NAME || 'loan',
   };
 }
+

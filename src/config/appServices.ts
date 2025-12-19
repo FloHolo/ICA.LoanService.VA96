@@ -18,7 +18,7 @@ export function getLoanRepo(): LoanRepo {
             endpoint: cfg.cosmosEndpoint,
             key: cfg.cosmosKey,
             databaseId: cfg.databaseName,
-            containerId: cfg.loanContainerName,
+            containerId: cfg.containerName,
         };
 
         cachedLoanRepo = new CosmosLoanRepo(options);
@@ -31,4 +31,13 @@ export function makeListLoans() {
     const deps = { loanRepo: getLoanRepo() };
     return (command: any) =>
         require('../app/list-loan').listLoans(deps, command);
+}
+export function makeCreateLoan() {
+  const deps = { loanRepo: getLoanRepo() };
+  return (params: any) => require('../app/create-loan').createLoanUseCase(deps, params);
+}
+
+export function makeEditLoan() {
+  const deps = { loanRepo: getLoanRepo() };
+  return (command: any) => require('../app/edit-loan').editLoan(deps, command);
 }

@@ -1,5 +1,5 @@
 {
-  "name": "catalogueservices-va96",
+  "name": "loanservice-va96",
   "version": "1.0.0",
   "description": "",
   "main": "dist/functions/*.js",
@@ -14,7 +14,7 @@
     "seed:test": "ts-node src/seed/testseed.ts"
   },
   "dependencies": {
-    "@azure/cosmos": "^4.7.0",
+    "@azure/cosmos": "^4.9.0",
     "@azure/functions": "^4.0.0",
     "@azure/identity": "^4.13.0"
   },

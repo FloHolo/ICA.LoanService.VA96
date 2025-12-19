@@ -49,4 +49,5 @@ __azurite_db*__.json
 
 #ignore
 
-zzz.azure.md   
+zzz.azureIGNOREPLS.md
+zzz.azureTest.md

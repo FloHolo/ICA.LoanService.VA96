@@ -1,27 +1,45 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
-import { listLoans } from '../app/list-loan';
-import { getLoanRepo } from '../config/appServices';
+import { makeListLoans } from '../config/appServices';
 
-app.http('list-loan-http', {
-  methods: ['GET'],
-  handler: async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
-    try {
-      const url = new URL(request.url);
-      const userId = url.searchParams.get('userId') || undefined;
+const getCorsHeaders = () => ({
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+});
 
-      const deps = { loanRepo: getLoanRepo() };
-      const command = { userId };
-      const loans = await listLoans(deps, command);
+async function listLoanHttp(
+  request: HttpRequest,
+  context: InvocationContext
+): Promise<HttpResponseInit> {
+  if (request.method === 'OPTIONS') {
+    return { status: 204, headers: getCorsHeaders() };
+  }
 
-      return {
-        status: 200,
-        body: JSON.stringify(loans),
-      };
-    } catch (error) {
-      return {
-        status: 500,
-        body: JSON.stringify({ error: 'Internal server error' }),
-      };
-    }
-  },
+  const listLoans = makeListLoans();
+  const command = {};
+  const result = await listLoans(command);
+
+  if (!result.success) {
+    return {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...getCorsHeaders() },
+      jsonBody: { errors: result.errors },
+    };
+  }
+
+  return {
+    status: 200,
+    headers: { 'Content-Type': 'application/json', ...getCorsHeaders() },
+    jsonBody: {
+      loans: result.loans,          // ✅ FIX
+      totalCount: result.totalCount,
+    },
+  };
+}
+
+app.http('listLoanHttp', {
+  methods: ['GET', 'OPTIONS'],
+  authLevel: 'anonymous',
+  route: 'loans',
+  handler: listLoanHttp,
 });

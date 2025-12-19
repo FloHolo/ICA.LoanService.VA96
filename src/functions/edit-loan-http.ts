@@ -1,39 +1,39 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
-import { editLoan, EditLoanCommand } from '../app/edit-loan';
-import { getLoanRepo } from '../config/appServices';
+import { makeEditLoan } from '../config/appServices';
 
-app.http('edit-loan-http', {
+const getCorsHeaders = () => ({
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+});
+
+async function editLoanHttp(
+  request: HttpRequest,
+  context: InvocationContext
+): Promise<HttpResponseInit> {
+  if (request.method === 'OPTIONS') {
+    return { status: 204, headers: getCorsHeaders() };
+  }
+
+  const editLoan = makeEditLoan();
+  const command = await request.json();
+  const result = await editLoan(command);
+
+  const isSuccess = result.success;
+  const response: HttpResponseInit = {
+    status: isSuccess ? 200 : 400,
+    headers: { 'Content-Type': 'application/json', ...getCorsHeaders() },
+    jsonBody: isSuccess
+      ? result.value
+      : { errors: (result as { errors: readonly string[] }).errors },
+  };
+
+  return response;
+}
+
+app.http('editLoanHttp', {
   methods: ['POST'],
-  handler: async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
-    try {
-      const command = await request.json() as EditLoanCommand;
-
-      if (!command || !command.loanId || !command.action) {
-        return {
-          status: 400,
-          body: JSON.stringify({ error: 'loanId and action are required' }),
-        };
-      }
-
-      const deps = { loanRepo: getLoanRepo() };
-      const result = await editLoan(deps, command);
-
-      if (!result.ok) {
-        return {
-          status: 400,
-          body: JSON.stringify({ errors: (result as { ok: false; errors: string[] }).errors }),
-        };
-      }
-
-      return {
-        status: 200,
-        body: JSON.stringify(result.value),
-      };
-    } catch (error) {
-      return {
-        status: 500,
-        body: JSON.stringify({ error: 'Internal server error' }),
-      };
-    }
-  },
+  authLevel: 'anonymous',
+  route: 'loans/edit',
+  handler: editLoanHttp,
 });
