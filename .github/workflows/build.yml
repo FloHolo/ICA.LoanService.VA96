@@ -30,6 +30,12 @@ jobs:
       - name: Build (into ./dist)
         run: npm run build
 
+        name: Run unit tests
+        run: npm test
+
+        name: Show code coverage
+        run: npm run test:coverage
+
       - name: Publish function app to package folder
         run: |
           # make an empty package folder
