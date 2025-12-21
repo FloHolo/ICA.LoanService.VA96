@@ -32,7 +32,7 @@ async function editLoanHttp(
 }
 
 app.http('editLoanHttp', {
-  methods: ['POST'],
+  methods: ['POST', 'OPTIONS'],
   authLevel: 'anonymous',
   route: 'loans/edit',
   handler: editLoanHttp,

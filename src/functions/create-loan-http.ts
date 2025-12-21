@@ -32,7 +32,7 @@ async function createLoanHttp(
 }
 
 app.http('createLoanHttp', {
-  methods: ['POST'],
+  methods: ['POST', 'OPTIONS'],
   authLevel: 'anonymous',
   route: 'loans/create',
   handler: createLoanHttp,
