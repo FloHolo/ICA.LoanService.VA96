@@ -1,4 +1,5 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
+import { v4 as uuidv4 } from 'uuid';
 import { makeCreateLoan } from '../config/appServices';
 
 const getCorsHeaders = () => ({
@@ -16,10 +17,21 @@ async function createLoanHttp(
   }
 
   const createLoan = makeCreateLoan();
-  const params = await request.json();
+  const params = await request.json() as Record<string, any>;
+  // Ensure id is present; generate if missing
+  if (!params.id) {
+    params.id = uuidv4();
+  }
+  // Remove loanedAt and dueAt if not provided, so backend sets them
+  if (!params.loanedAt) {
+    delete params.loanedAt;
+  }
+  if (!params.dueAt) {
+    delete params.dueAt;
+  }
   const result = await createLoan(params);
 
-  const isSuccess = result.success;
+  const isSuccess = result.ok;
   const response: HttpResponseInit = {
     status: isSuccess ? 201 : 400,
     headers: { 'Content-Type': 'application/json', ...getCorsHeaders() },

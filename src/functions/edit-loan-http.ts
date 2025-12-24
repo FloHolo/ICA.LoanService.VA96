@@ -19,7 +19,7 @@ async function editLoanHttp(
   const command = await request.json();
   const result = await editLoan(command);
 
-  const isSuccess = result.success;
+  const isSuccess = result.ok;
   const response: HttpResponseInit = {
     status: isSuccess ? 200 : 400,
     headers: { 'Content-Type': 'application/json', ...getCorsHeaders() },

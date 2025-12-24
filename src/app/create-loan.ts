@@ -16,12 +16,14 @@ import {
   Result,
   err,
 } from '../domain/Loan';
-import { LoanRepo } from '../domain/Loan-Repo';
+import type { LoanRepo } from '../domain/Loan-Repo';
+import type { LoanEventPublisher } from './loan-event-publisher';
 
 /* ---------------- Dependencies ---------------- */
 
 export interface CreateLoanDeps {
   loanRepo: LoanRepo;
+  loanEventPublisher?: LoanEventPublisher;
 }
 
 /* ---------------- Use Case ---------------- */
@@ -48,6 +50,24 @@ export async function createLoanUseCase(
   // Step 2: Persist loan
   try {
     await deps.loanRepo.create(loanResult.value);
+
+    // Optionally publish event if publisher is provided
+    if (deps.loanEventPublisher) {
+      try {
+        await deps.loanEventPublisher.publishLoanUpdated({
+          catalogueItemId: loanResult.value.deviceId, // Use deviceId as catalogue item
+          delta: -1, // Loan created, reserve one
+          availableUnits: null, // Not available in Loan entity
+          reason: 'RESERVED',
+          occurredAt: new Date().toISOString(),
+        });
+      } catch (eventErr) {
+        // Log and continue, do not fail loan creation
+        // eslint-disable-next-line no-console
+        console.error('Failed to publish loan event:', eventErr);
+      }
+    }
+
     return loanResult;
   } catch (e: unknown) {
     const message =

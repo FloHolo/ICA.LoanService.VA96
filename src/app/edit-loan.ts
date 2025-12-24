@@ -8,12 +8,14 @@
  */
 
 import { Loan, returnLoan, Result, err } from '../domain/Loan';
-import { LoanRepo } from '../domain/Loan-Repo';
+import type { LoanRepo } from '../domain/Loan-Repo';
+import type { LoanEventPublisher } from './loan-event-publisher';
 
 /* ---------------- Dependencies ---------------- */
 
 export interface EditLoanDeps {
   loanRepo: LoanRepo;
+  loanEventPublisher?: LoanEventPublisher;
 }
 
 /* ---------------- Command ---------------- */
@@ -53,6 +55,24 @@ export async function editLoan(
   // Step 3: Persist changes
   try {
     await deps.loanRepo.update(updatedResult.value);
+
+    // Optionally publish event if publisher is provided
+    if (deps.loanEventPublisher) {
+      try {
+        await deps.loanEventPublisher.publishLoanUpdated({
+          catalogueItemId: updatedResult.value.deviceId, // Use deviceId as catalogue item
+          delta: 1, // Loan returned, increase available
+          availableUnits: null, // Not available in Loan entity
+          reason: 'RETURNED',
+          occurredAt: new Date().toISOString(),
+        });
+      } catch (eventErr) {
+        // Log and continue, do not fail loan update
+        // eslint-disable-next-line no-console
+        console.error('Failed to publish loan event:', eventErr);
+      }
+    }
+
     return updatedResult;
   } catch (e: unknown) {
     const message =
