@@ -9,7 +9,7 @@ export type LoanUpdateEvent = {
 
 export interface LoanEventPublisher {
   /**
-   * Publish an event when a product is updated.
+   * Publish an event when a loan is updated.
    */
   publishLoanUpdated(event: LoanUpdateEvent): Promise<void>;
 }

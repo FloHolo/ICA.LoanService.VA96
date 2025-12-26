@@ -1,4 +1,5 @@
 import type { Loan } from '../domain/Loan';
+import type { AuthContext } from './auth-context';
 import type { LoanRepo } from '../domain/Loan-Repo';
 
 export type ListLoansCommand = {
@@ -18,12 +19,20 @@ export type ListLoansResult =
 
 export type ListLoansDeps = {
   loanRepo: LoanRepo;
+  authContext: AuthContext;
 };
 
 export async function listLoans(
   deps: ListLoansDeps,
   command: ListLoansCommand = {}
 ): Promise<ListLoansResult> {
+  // Enforce authentication
+  if (!deps.authContext?.authenticated) {
+    return {
+      success: false,
+      errors: ['Authentication required'],
+    };
+  }
   try {
     const loans = command.userId
       ? await deps.loanRepo.findActiveByUserId(command.userId)

@@ -16,7 +16,7 @@ async function createLoanHttp(
     return { status: 204, headers: getCorsHeaders() };
   }
 
-  const createLoan = makeCreateLoan();
+  const createLoan = await makeCreateLoan(request);
   const params = await request.json() as Record<string, any>;
   // Ensure id is present; generate if missing
   if (!params.id) {

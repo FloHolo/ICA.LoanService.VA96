@@ -15,7 +15,7 @@ async function editLoanHttp(
     return { status: 204, headers: getCorsHeaders() };
   }
 
-  const editLoan = makeEditLoan();
+  const editLoan = await makeEditLoan(request);
   const command = await request.json();
   const result = await editLoan(command);
 

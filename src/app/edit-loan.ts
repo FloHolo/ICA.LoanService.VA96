@@ -10,12 +10,15 @@
 import { Loan, returnLoan, Result, err } from '../domain/Loan';
 import type { LoanRepo } from '../domain/Loan-Repo';
 import type { LoanEventPublisher } from './loan-event-publisher';
+import type { AuthContext } from './auth-context';
 
 /* ---------------- Dependencies ---------------- */
 
 export interface EditLoanDeps {
   loanRepo: LoanRepo;
-  loanEventPublisher?: LoanEventPublisher;
+  loanEventPublisher: LoanEventPublisher;
+  authContext: AuthContext;
+// ...existing code...
 }
 
 /* ---------------- Command ---------------- */
@@ -31,6 +34,10 @@ export async function editLoan(
   deps: EditLoanDeps,
   command: EditLoanCommand
 ): Promise<Result<Loan, string>> {
+  // Enforce authentication
+  if (!deps.authContext?.authenticated) {
+    return err(['Authentication required']);
+  }
   // Step 1: Load loan
   const loan = await deps.loanRepo.getById(command.loanId);
   if (!loan) {
@@ -56,21 +63,18 @@ export async function editLoan(
   try {
     await deps.loanRepo.update(updatedResult.value);
 
-    // Optionally publish event if publisher is provided
-    if (deps.loanEventPublisher) {
-      try {
-        await deps.loanEventPublisher.publishLoanUpdated({
-          catalogueItemId: updatedResult.value.deviceId, // Use deviceId as catalogue item
-          delta: 1, // Loan returned, increase available
-          availableUnits: null, // Not available in Loan entity
-          reason: 'RETURNED',
-          occurredAt: new Date().toISOString(),
-        });
-      } catch (eventErr) {
-        // Log and continue, do not fail loan update
-        // eslint-disable-next-line no-console
-        console.error('Failed to publish loan event:', eventErr);
-      }
+    try {
+      await deps.loanEventPublisher.publishLoanUpdated({
+        catalogueItemId: updatedResult.value.deviceId, // Use deviceId as catalogue item
+        delta: 1, // Loan returned, increase available
+        availableUnits: null, // Not available in Loan entity
+        reason: 'RETURNED',
+        occurredAt: new Date().toISOString(),
+      });
+    } catch (eventErr) {
+      // Log and continue, do not fail loan update
+      // eslint-disable-next-line no-console
+      console.error('Failed to publish loan event:', eventErr);
     }
 
     return updatedResult;

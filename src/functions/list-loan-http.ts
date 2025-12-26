@@ -15,7 +15,7 @@ async function listLoanHttp(
     return { status: 204, headers: getCorsHeaders() };
   }
 
-  const listLoans = makeListLoans();
+  const listLoans = await makeListLoans(request);
   const command = {};
   const result = await listLoans(command);
 
