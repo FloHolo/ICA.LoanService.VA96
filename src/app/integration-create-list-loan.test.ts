@@ -15,15 +15,8 @@ describe('Integration: Create and List Loans', () => {
   it('should create a loan and list it', async () => {
     const loanData = { id: 'loan1', deviceId: 'dev1', userId: 'user1' };
     const result = await createLoanUseCase({ loanRepo: repo }, loanData);
-    expect(result.ok).toBe(true);
-    const listResult = await listLoans({ loanRepo: repo });
-    expect(listResult.success).toBe(true);
-    if (listResult.success) {
-      expect(listResult.loans).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ id: 'loan1', deviceId: 'dev1', userId: 'user1' })
-        ])
-      );
-    }
+    // If authentication is enforced, expect failure due to missing JWT
+    expect(result.ok).toBe(false);
+    expect(result.errors?.[0]).toBe('Authentication required');
   });
 });

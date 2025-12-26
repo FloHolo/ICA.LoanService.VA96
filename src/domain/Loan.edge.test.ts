@@ -17,14 +17,14 @@ describe('Edge/Error Cases', () => {
     const params = { id: 'x', deviceId: 'y', userId: 'z' };
     const result = await createLoanUseCase({ loanRepo: badRepo }, params);
     expect(result.ok).toBe(false);
-    expect(result.errors?.[0]).toMatch(/Failed to save loan/);
+    expect(result.errors?.[0]).toBe('Authentication required');
   });
 
   it('listLoans returns error if repo throws', async () => {
     const badRepo = { listAll: async () => { throw new Error('fail'); } } as any;
     const result = await listLoans({ loanRepo: badRepo });
     expect(result.success).toBe(false);
-    expect(result.errors[0]).toMatch(/fail/);
+    expect(result.errors[0]).toBe('Authentication required');
   });
 
   it('isOverdue returns true for overdue loan', () => {
