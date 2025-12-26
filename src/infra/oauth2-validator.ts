@@ -43,7 +43,7 @@ export class OAuth2Validator {
     const token = this.extractToken(request);
 
     if (!token) {
-      return { authenticated: false, scopes: [] };
+      return { authenticated: false, scopes: [], error: 'No Authorization header or Bearer token found' };
     }
 
     try {
@@ -53,8 +53,6 @@ export class OAuth2Validator {
       });
 
       // Extract scopes from token
-      // OAuth2 tokens typically include scopes in the 'scope' claim as a space-separated string
-      // or as a 'scp' claim (Azure AD style) as an array or string
       let scopes: string[] = [];
 
       if (typeof payload.scope === 'string') {
@@ -72,8 +70,9 @@ export class OAuth2Validator {
       };
     } catch (error) {
       // Token validation failed (expired, invalid signature, wrong issuer/audience, etc.)
-      console.warn('Token validation failed:', (error as Error).message);
-      return { authenticated: false, scopes: [] };
+      const errMsg = (error as Error).message || 'Unknown token validation error';
+      console.warn('Token validation failed:', errMsg);
+      return { authenticated: false, scopes: [], error: errMsg };
     }
   }
 
