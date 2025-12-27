@@ -4,6 +4,25 @@ import {
 } from "../infra/cosmos-Loan-repo";
 import { LoanRepo } from "../domain/Loan-Repo";
 import { getEnvConfig } from "./envConfig";
+import { EventGridLoanEventPublisher, EventGridOptions } from '../infra/eventgrid-loan-event-publisher';
+import { DummyLoanEventPublisher } from '../infra/dummy-loan-event-publisher';
+import type { LoanEventPublisher } from '../app/loan-event-publisher';
+let cachedLoanEventPublisher: LoanEventPublisher | null = null;
+
+function getLoanEventPublisher(): LoanEventPublisher {
+    if (!cachedLoanEventPublisher) {
+        const endpoint = process.env.EVENTGRID_ENDPOINT || process.env.EVENTGRID_URL;
+        const key = process.env.EVENTGRID_KEY;
+        if (endpoint && key) {
+            const options: EventGridOptions = { endpoint, key };
+            cachedLoanEventPublisher = new EventGridLoanEventPublisher(options);
+        } else {
+            // Fallback to dummy for local/test
+            cachedLoanEventPublisher = new DummyLoanEventPublisher();
+        }
+    }
+    return cachedLoanEventPublisher;
+}
 
 let cachedLoanRepo: LoanRepo | null = null;
 
