@@ -52,11 +52,17 @@ export function makeListLoans() {
         require('../app/list-loan').listLoans(deps, command);
 }
 export function makeCreateLoan() {
-  const deps = { loanRepo: getLoanRepo() };
-  return (params: any) => require('../app/create-loan').createLoanUseCase(deps, params);
+    const deps = {
+        loanRepo: getLoanRepo(),
+        loanEventPublisher: getLoanEventPublisher(),
+    };
+    return (params: any) => require('../app/create-loan').createLoanUseCase(deps, params);
 }
 
 export function makeEditLoan() {
-  const deps = { loanRepo: getLoanRepo() };
-  return (command: any) => require('../app/edit-loan').editLoan(deps, command);
+    const deps = {
+        loanRepo: getLoanRepo(),
+        loanEventPublisher: getLoanEventPublisher(),
+    };
+    return (command: any) => require('../app/edit-loan').editLoan(deps, command);
 }
